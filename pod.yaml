@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: simple-consumer-pod
+spec:
+  containers:
+    - name: simple-consumer-container   # ye tu apne hisaab se rakh sakta hai
+      image: riteshmishra2637/simpleconsumerimage:latest # ye actual Docker image ka naam hai
+      ports:
+        - containerPort: 8080

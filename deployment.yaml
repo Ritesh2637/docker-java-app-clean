@@ -1,0 +1,18 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: java-hello-deployment
+spec:
+  replicas: 6
+  selector:
+    matchLabels:
+      app: java-hello
+  template:
+    metadata:
+      labels:
+        app: java-hello
+    spec:
+      containers:
+        - name: java-hello-container
+          image: riteshmishra2637/docker-java-app:app
+          imagePullPolicy: IfNotPresent
