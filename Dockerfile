@@ -8,5 +8,6 @@ RUN mvn clean package -DskipTests
 # Stage 2: Run the JAR with a lightweight JDK
 FROM eclipse-temurin:17-jdk-alpine
 WORKDIR /app
+# Copy the final JAR built by Maven Shade plugin
 COPY --from=build /app/target/app.jar app.jar
 CMD ["java", "-jar", "app.jar"]
