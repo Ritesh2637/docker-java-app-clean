@@ -8,6 +8,13 @@ RUN mvn clean package -DskipTests
 # Stage 2: Run the JAR with a lightweight JDK
 FROM eclipse-temurin:17-jdk-alpine
 WORKDIR /app
-# Copy the final JAR built by Maven Shade plugin
-COPY --from=build /app/target/app.jar app.jar
+
+# Copy shaded JAR from build stage
+COPY --from=build /app/target/docker-java-app-1.0.0-SNAPSHOT-shaded.jar app.jar
+
+# Environment variable for BigQuery credentials
+# Jenkins pipeline will inject key.json at runtime
+ENV GOOGLE_APPLICATION_CREDENTIALS=/app/key.json
+
+# Run the app
 CMD ["java", "-jar", "app.jar"]
