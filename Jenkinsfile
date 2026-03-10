@@ -16,11 +16,12 @@ pipeline {
                 sh 'docker build -t docker-java-app:app .'
             }
         }
-        stage('Docker Run') {
-            steps {
-                // Run container and print output
-                sh 'docker run --rm docker-java-app:app'
-            }
+      stage('Docker Run') {
+    steps {
+        withCredentials([file(credentialsId: 'gcp-key', variable: 'GOOGLE_APPLICATION_CREDENTIALS')]) {
+            sh 'docker run --rm -e GOOGLE_APPLICATION_CREDENTIALS=$GOOGLE_APPLICATION_CREDENTIALS docker-java-app:app'
         }
+    }
+}
     }
 }
