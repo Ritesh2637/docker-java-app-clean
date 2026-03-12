@@ -16,16 +16,17 @@ pipeline {
                 sh 'docker build -t docker-java-app:app .'
             }
         }
-    stage('Docker Run') {
+   stage('Docker Run') {
     steps {
         withCredentials([file(credentialsId: 'gcp-key', variable: 'GCP_KEY')]) {
             sh '''
-                echo "Secret file path: $GCP_KEY"
+                echo "Secret file path on host: $GCP_KEY"
                 ls -l $GCP_KEY
                 docker run --rm \
                 -e GOOGLE_APPLICATION_CREDENTIALS=/app/key.json \
-                -v $GCP_KEY:/app/key.json \
-                docker-java-app:app
+                -v $GCP_KEY:/app/key.json:ro \
+                docker-java-app:app \
+                java -jar app.jar
             '''
         }
     }
