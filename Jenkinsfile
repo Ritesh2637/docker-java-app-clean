@@ -7,32 +7,34 @@ pipeline {
             }
         }
 
-        stage('Build') {
+        stage('Build Docker Image') {
             steps {
-                sh 'mvn clean package -DskipTests'
+                sh 'docker build -t ritesh/docker-java-app:latest .'
             }
         }
 
-        stage('Docker Build') {
+        stage('Push Docker Image') {
             steps {
-                sh 'docker build --no-cache -t docker-java-app:app .'
+                withCredentials([usernamePassword(credentialsId: 'dockerhub-creds', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
+                    sh '''
+                        echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin
+                        docker push ritesh/docker-java-app:latest
+                    '''
+                }
             }
         }
 
-        stage('Docker Run') {
-    steps {
-        withCredentials([file(credentialsId: 'gcp-key', variable: 'GCP_KEY')]) {
-            sh '''
-                echo "Secret file path inside Jenkins container: $GCP_KEY"
-                cp $GCP_KEY ./gcp-key.json   # copy to workspace
-
-                docker run --rm \
-                  -e GOOGLE_APPLICATION_CREDENTIALS=/app/gcp-key.json \
-                  -v $(pwd)/gcp-key.json:/app/gcp-key.json:ro \
-                  docker-java-app:app
-            '''
+        stage('Deploy to Kubernetes') {
+            steps {
+                withCredentials([file(credentialsId: 'kubeconfig', variable: 'KUBECONFIG_FILE')]) {
+                    sh '''
+                        export KUBECONFIG=$KUBECONFIG_FILE
+                        kubectl apply -f k8s/deployment.yaml
+                        kubectl apply -f k8s/service.yaml
+                        kubectl get pods -o wide
+                    '''
+                }
+            }
         }
-    }
-}
     }
 }
