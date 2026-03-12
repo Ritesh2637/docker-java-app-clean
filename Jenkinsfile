@@ -29,9 +29,9 @@ pipeline {
 
                         # Mount the secret file to a clean path and run the app
                         docker run --rm \
-                          -e GOOGLE_APPLICATION_CREDENTIALS=/gcp-key.json \
-                          -v ${GCP_KEY}:/gcp-key.json:ro \
-                          docker-java-app:app
+                       -e GOOGLE_APPLICATION_CREDENTIALS=/secrets \
+                       -v ${GCP_KEY}:/secrets:ro \
+                        docker-java-app:app
                     '''
                 }
             }
