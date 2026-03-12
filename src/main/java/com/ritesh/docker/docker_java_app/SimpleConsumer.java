@@ -41,27 +41,18 @@ public class SimpleConsumer {
 
     public static void insertIntoBigQuery(String message) {
         try {
-            String credentialsDirPath = System.getenv("GOOGLE_APPLICATION_CREDENTIALS");
-            if (credentialsDirPath == null || credentialsDirPath.isEmpty()) {
+            String credentialsPath = System.getenv("GOOGLE_APPLICATION_CREDENTIALS");
+            if (credentialsPath == null || credentialsPath.isEmpty()) {
                 throw new RuntimeException("GOOGLE_APPLICATION_CREDENTIALS not set");
             }
 
             // Debug print
-            System.out.println("GOOGLE_APPLICATION_CREDENTIALS=" + credentialsDirPath);
+            System.out.println("GOOGLE_APPLICATION_CREDENTIALS=" + credentialsPath);
 
-            File credDir = new File(credentialsDirPath);
-            if (!credDir.exists() || !credDir.isDirectory()) {
-                throw new RuntimeException("Credential path is not a directory: " + credentialsDirPath);
+            File credFile = new File(credentialsPath);
+            if (!credFile.exists() || !credFile.isFile()) {
+                throw new RuntimeException("Credential file not found: " + credentialsPath);
             }
-
-            File[] files = credDir.listFiles();
-            if (files == null || files.length == 0) {
-                throw new RuntimeException("No credential file found in: " + credentialsDirPath);
-            }
-
-            // Pick the first file inside the directory
-            File credFile = files[0];
-            System.out.println("Using credential file: " + credFile.getAbsolutePath());
 
             try (FileInputStream serviceAccountStream = new FileInputStream(credFile)) {
                 ServiceAccountCredentials credentials = ServiceAccountCredentials.fromStream(serviceAccountStream);
