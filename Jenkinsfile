@@ -16,20 +16,32 @@ pipeline {
                 sh 'docker build -t docker-java-app:app .'
             }
         }
-   stage('Docker Run') {
+        stage('Docker Run') {
+               steps {
+                     withCredentials([file(credentialsId: 'gcp-key', variable: 'GCP_KEY')]) {
+                     sh '''
+                     echo "Secret file path on host: $GCP_KEY"
+                     ls -l $GCP_KEY
+                     docker run --rm \
+                    -e GOOGLE_APPLICATION_CREDENTIALS=/tmp/key.json \
+                    -v $GCP_KEY:/tmp/key.json:ro \
+                     docker-java-app:app \
+                     java -jar app.jar
+                     '''
+        }
+    }
+}
+        stage('Docker Debug') {
     steps {
         withCredentials([file(credentialsId: 'gcp-key', variable: 'GCP_KEY')]) {
             sh '''
-                echo "Secret file path on host: $GCP_KEY"
-                ls -l $GCP_KEY
                 docker run --rm \
-                -e GOOGLE_APPLICATION_CREDENTIALS=/app/gcp-key.json \
-                -v $GCP_KEY:/app/gcp-key.json:ro \
+                -v $GCP_KEY:/tmp/key.json:ro \
                 docker-java-app:app \
-                java -jar app.jar
+                ls -l /tmp
             '''
         }
     }
 }
-    }
+}
 }
