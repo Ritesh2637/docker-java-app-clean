@@ -29,7 +29,7 @@ pipeline {
                 withCredentials([file(credentialsId: 'kubeconfig', variable: 'KUBECONFIG_FILE')]) {
                     sh '''
                         export KUBECONFIG=$KUBECONFIG_FILE
-                        kubectl apply -f k8s/deployment.yaml
+                        kubectl apply -f deployment.yaml
                         kubectl rollout status deployment/docker-java-app
                         kubectl get pods -o wide
                     '''
