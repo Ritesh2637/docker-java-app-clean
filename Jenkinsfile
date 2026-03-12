@@ -31,17 +31,5 @@ pipeline {
                 }
             }
         }
-        stage('Docker Debug') {
-            steps {
-                withCredentials([file(credentialsId: 'gcp-key', variable: 'GCP_KEY')]) {
-                    bat '''
-                        docker run --rm ^
-                          -v "%GCP_KEY%\\kafka-pipeline-project-136237569977.json:/credentials/service-account.json:ro" ^
-                          docker-java-app:app ^
-                          ls -l /credentials
-                    '''
-                }
-            }
-        }
     }
 }
