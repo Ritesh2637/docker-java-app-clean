@@ -41,12 +41,12 @@ public class SimpleConsumer {
 
     public static void insertIntoBigQuery(String message) {
         try {
+            // Get credentials path from environment variable
             String credentialsPath = System.getenv("GOOGLE_APPLICATION_CREDENTIALS");
             if (credentialsPath == null || credentialsPath.isEmpty()) {
                 throw new RuntimeException("GOOGLE_APPLICATION_CREDENTIALS not set");
             }
 
-            // Debug print
             System.out.println("GOOGLE_APPLICATION_CREDENTIALS=" + credentialsPath);
 
             File credFile = new File(credentialsPath);
@@ -54,6 +54,7 @@ public class SimpleConsumer {
                 throw new RuntimeException("Credential file not found: " + credentialsPath);
             }
 
+            // Load credentials
             try (FileInputStream serviceAccountStream = new FileInputStream(credFile)) {
                 ServiceAccountCredentials credentials = ServiceAccountCredentials.fromStream(serviceAccountStream);
 
@@ -62,13 +63,16 @@ public class SimpleConsumer {
                         .build()
                         .getService();
 
+                // Target table
                 TableId tableId = TableId.of("kafka_pipeline", "messages");
 
+                // Row content
                 Map<String, Object> rowContent = new HashMap<>();
                 rowContent.put("id", UUID.randomUUID().toString());
                 rowContent.put("message", message);
                 rowContent.put("timestamp", System.currentTimeMillis() / 1000.0);
 
+                // Insert request
                 InsertAllRequest request = InsertAllRequest.newBuilder(tableId)
                         .addRow(rowContent)
                         .build();
