@@ -28,9 +28,9 @@ pipeline {
                 ls -l $GCP_KEY
 
                 docker run --rm \
-                  -e GOOGLE_APPLICATION_CREDENTIALS=/tmp/key.json \
-                  -v ${GCP_KEY}:/tmp/key.json:ro \
-                  docker-java-app:app
+                -e GOOGLE_APPLICATION_CREDENTIALS=/tmp/secret/gcp-key.json \
+                -v ${GCP_KEY}:/tmp/secret/gcp-key.json:ro \
+                docker-java-app:app
             '''
         }
     }
