@@ -15,6 +15,7 @@ pipeline {
 
         stage('Docker Build') {
             steps {
+                // Fresh rebuild without cache
                 sh 'docker build --no-cache -t docker-java-app:app .'
             }
         }
@@ -26,10 +27,10 @@ pipeline {
                         echo "Secret file path on host: $GCP_KEY"
                         ls -l $GCP_KEY
 
-                        # Mount the actual secret file
+                        # Mount the actual secret file correctly
                         docker run --rm \
                           -e GOOGLE_APPLICATION_CREDENTIALS=/app/key.json \
-                          -v $GCP_KEY:/app/key.json:ro \
+                          -v ${GCP_KEY}:/app/key.json:ro \
                           docker-java-app:app
                     '''
                 }
