@@ -13,8 +13,8 @@ WORKDIR /app
 COPY --from=build /app/target/docker-java-app-1.0.0-SNAPSHOT-shaded.jar app.jar
 
 # Environment variable for BigQuery credentials
-# Jenkins pipeline will inject key.json at runtime
+# Jenkins pipeline or docker run will inject gcp-key.json at runtime
 ENV GOOGLE_APPLICATION_CREDENTIALS=/app/key.json
 
-# Run the app
+# Default command to run the app
 CMD ["java", "-jar", "app.jar"]
