@@ -8,25 +8,25 @@ pipeline {
         }
         stage('Build') {
             steps {
-                sh 'mvn clean package -DskipTests'
+                bat 'mvn clean package -DskipTests'
             }
         }
         stage('Docker Build') {
             steps {
-                sh 'docker build -t docker-java-app:app .'
+                bat 'docker build -t docker-java-app:app .'
             }
         }
         stage('Docker Run') {
             steps {
                 withCredentials([file(credentialsId: 'gcp-key', variable: 'GCP_KEY')]) {
-                    sh '''
-                        echo "Secret file path on host: $GCP_KEY"
-                        ls -l $GCP_KEY
-                        docker run --rm \
-                        -e GOOGLE_APPLICATION_CREDENTIALS=/credentials/service-account.json \
-                        -v $GCP_KEY/kafka-pipeline-project-136237569977.json:/credentials/service-account.json:ro \
-                        docker-java-app:app \
-                        java -jar app.jar
+                    bat '''
+                        echo Secret file path on host: %GCP_KEY%
+                        dir %GCP_KEY%
+                        docker run --rm ^
+                          -e GOOGLE_APPLICATION_CREDENTIALS=/credentials/service-account.json ^
+                          -v "%GCP_KEY%\\kafka-pipeline-project-136237569977.json:/credentials/service-account.json:ro" ^
+                          docker-java-app:app ^
+                          java -jar app.jar
                     '''
                 }
             }
@@ -34,11 +34,11 @@ pipeline {
         stage('Docker Debug') {
             steps {
                 withCredentials([file(credentialsId: 'gcp-key', variable: 'GCP_KEY')]) {
-                    sh '''
-                        docker run --rm \
-                        -v $GCP_KEY/kafka-pipeline-project-136237569977.json:/credentials/service-account.json:ro \
-                        docker-java-app:app \
-                        ls -l /credentials
+                    bat '''
+                        docker run --rm ^
+                          -v "%GCP_KEY%\\kafka-pipeline-project-136237569977.json:/credentials/service-account.json:ro" ^
+                          docker-java-app:app ^
+                          ls -l /credentials
                     '''
                 }
             }
