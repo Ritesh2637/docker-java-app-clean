@@ -23,10 +23,9 @@ pipeline {
                         echo Secret file path on host: %GCP_KEY%
                         dir %GCP_KEY%
                         docker run --rm ^
-                          -e GOOGLE_APPLICATION_CREDENTIALS=/credentials/service-account.json ^
-                          -v "%GCP_KEY%\\kafka-pipeline-project-136237569977.json:/credentials/service-account.json:ro" ^
-                          docker-java-app:app ^
-                          java -jar app.jar
+                          -e GOOGLE_APPLICATION_CREDENTIALS=/app/key.json ^
+                          -v "%GCP_KEY%:/app/key.json:ro" ^
+                          docker-java-app:app
                     '''
                 }
             }
