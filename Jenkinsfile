@@ -9,7 +9,7 @@ pipeline {
 
         stage('Build Docker Image') {
             steps {
-                sh 'docker build -t ritesh/docker-java-app:latest .'
+                sh 'docker build -t riteshmishra2637/docker-java-app:latest .'
             }
         }
 
@@ -18,7 +18,7 @@ pipeline {
                 withCredentials([usernamePassword(credentialsId: 'dockerhub-creds', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
                     sh '''
                         echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin
-                        docker push ritesh/docker-java-app:latest
+                        docker push riteshmishra2637/docker-java-app:latest
                     '''
                 }
             }
@@ -30,7 +30,7 @@ pipeline {
                     sh '''
                         export KUBECONFIG=$KUBECONFIG_FILE
                         kubectl apply -f k8s/deployment.yaml
-                        kubectl apply -f k8s/service.yaml
+                        kubectl rollout status deployment/docker-java-app
                         kubectl get pods -o wide
                     '''
                 }
