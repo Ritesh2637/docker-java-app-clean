@@ -10,6 +10,7 @@ import com.google.cloud.bigquery.InsertAllResponse;
 import com.google.cloud.bigquery.TableId;
 import com.google.auth.oauth2.ServiceAccountCredentials;
 
+import java.io.File;
 import java.io.FileInputStream;
 import java.time.Duration;
 import java.util.*;
@@ -40,13 +41,29 @@ public class SimpleConsumer {
 
     public static void insertIntoBigQuery(String message) {
         try {
-            String credentialsPath = System.getenv("GOOGLE_APPLICATION_CREDENTIALS");
-            if (credentialsPath == null || credentialsPath.isEmpty()) {
+            String credentialsDirPath = System.getenv("GOOGLE_APPLICATION_CREDENTIALS");
+            if (credentialsDirPath == null || credentialsDirPath.isEmpty()) {
                 throw new RuntimeException("GOOGLE_APPLICATION_CREDENTIALS not set");
             }
 
-            // Directly try to open the file stream (avoid isFile() check)
-            try (FileInputStream serviceAccountStream = new FileInputStream(credentialsPath)) {
+            // Debug print
+            System.out.println("GOOGLE_APPLICATION_CREDENTIALS=" + credentialsDirPath);
+
+            File credDir = new File(credentialsDirPath);
+            if (!credDir.exists() || !credDir.isDirectory()) {
+                throw new RuntimeException("Credential path is not a directory: " + credentialsDirPath);
+            }
+
+            File[] files = credDir.listFiles();
+            if (files == null || files.length == 0) {
+                throw new RuntimeException("No credential file found in: " + credentialsDirPath);
+            }
+
+            // Pick the first file inside the directory
+            File credFile = files[0];
+            System.out.println("Using credential file: " + credFile.getAbsolutePath());
+
+            try (FileInputStream serviceAccountStream = new FileInputStream(credFile)) {
                 ServiceAccountCredentials credentials = ServiceAccountCredentials.fromStream(serviceAccountStream);
 
                 BigQuery bigquery = BigQueryOptions.newBuilder()
