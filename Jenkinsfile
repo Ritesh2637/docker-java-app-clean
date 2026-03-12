@@ -22,8 +22,8 @@ pipeline {
             sh '''
                 docker run --rm \
                 -e GOOGLE_APPLICATION_CREDENTIALS=/app/key.json \
-                docker-java-app:app \
-                /bin/sh -c "cp $GOOGLE_APPLICATION_CREDENTIALS /app/key.json && java -jar app.jar"
+                -v ${GOOGLE_APPLICATION_CREDENTIALS}:/app/key.json:ro \
+                docker-java-app:app
             '''
         }
     }
