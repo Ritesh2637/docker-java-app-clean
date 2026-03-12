@@ -24,7 +24,7 @@ pipeline {
                         ls -l $GCP_KEY
                         docker run --rm \
                         -e GOOGLE_APPLICATION_CREDENTIALS=/credentials/service-account.json \
-                        -v $GCP_KEY:/credentials/service-account.json:ro \
+                        -v $GCP_KEY/kafka-pipeline-project-136237569977.json:/credentials/service-account.json:ro \
                         docker-java-app:app \
                         java -jar app.jar
                     '''
@@ -36,7 +36,7 @@ pipeline {
                 withCredentials([file(credentialsId: 'gcp-key', variable: 'GCP_KEY')]) {
                     sh '''
                         docker run --rm \
-                        -v $GCP_KEY:/credentials/service-account.json:ro \
+                        -v $GCP_KEY/kafka-pipeline-project-136237569977.json:/credentials/service-account.json:ro \
                         docker-java-app:app \
                         ls -l /credentials
                     '''
