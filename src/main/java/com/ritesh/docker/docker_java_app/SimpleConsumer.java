@@ -1,82 +1,51 @@
-package com.ritesh.docker.docker_java_app;
+public static void insertIntoBigQuery(String message) {
+    try {
+        String credentialsPath = System.getenv("GOOGLE_APPLICATION_CREDENTIALS");
+        if (credentialsPath == null || credentialsPath.isEmpty()) {
+            throw new RuntimeException("GOOGLE_APPLICATION_CREDENTIALS not set");
+        }
 
-import org.apache.kafka.clients.consumer.*;
-import org.apache.kafka.common.serialization.StringDeserializer;
+        // Debug print
+        System.out.println("GOOGLE_APPLICATION_CREDENTIALS=" + credentialsPath);
 
-import com.google.cloud.bigquery.BigQuery;
-import com.google.cloud.bigquery.BigQueryOptions;
-import com.google.cloud.bigquery.InsertAllRequest;
-import com.google.cloud.bigquery.InsertAllResponse;
-import com.google.cloud.bigquery.TableId;
-import com.google.auth.oauth2.ServiceAccountCredentials;
+        File credFile = new File(credentialsPath);
+        if (!credFile.exists()) {
+            throw new RuntimeException("Credential file does not exist: " + credentialsPath);
+        }
+        if (!credFile.isFile()) {
+            throw new RuntimeException("Credential path is not a file: " + credentialsPath);
+        }
 
-import java.io.FileInputStream;
-import java.time.Duration;
-import java.util.*;
+        try (FileInputStream serviceAccountStream = new FileInputStream(credFile)) {
+            ServiceAccountCredentials credentials = ServiceAccountCredentials.fromStream(serviceAccountStream);
 
-public class SimpleConsumer {
+            BigQuery bigquery = BigQueryOptions.newBuilder()
+                    .setCredentials(credentials)
+                    .build()
+                    .getService();
 
-    public static void main(String[] args) {
-        // Kafka consumer properties
-        Properties props = new Properties();
-        props.put("bootstrap.servers", "host.docker.internal:9092");
-        props.put("group.id", "demo-group");
-        props.put("key.deserializer", StringDeserializer.class.getName());
-        props.put("value.deserializer", StringDeserializer.class.getName());
+            TableId tableId = TableId.of("kafka_pipeline", "messages");
 
-        KafkaConsumer<String, String> consumer = new KafkaConsumer<>(props);
-        consumer.subscribe(Arrays.asList("test"));
+            Map<String, Object> rowContent = new HashMap<>();
+            rowContent.put("id", UUID.randomUUID().toString());
+            rowContent.put("message", message);
+            rowContent.put("timestamp", System.currentTimeMillis() / 1000.0);
 
-        while (true) {
-            ConsumerRecords<String, String> records = consumer.poll(Duration.ofMillis(100));
-            for (ConsumerRecord<String, String> record : records) {
-                String message = record.value();
-                System.out.println("Received message: " + message);
+            InsertAllRequest request = InsertAllRequest.newBuilder(tableId)
+                    .addRow(rowContent)
+                    .build();
 
-                insertIntoBigQuery(message);
+            InsertAllResponse response = bigquery.insertAll(request);
+
+            if (response.hasErrors()) {
+                System.out.println("Insert failed: " + response.getInsertErrors());
+            } else {
+                System.out.println("Data inserted successfully: " + message);
             }
         }
-    }
 
-    public static void insertIntoBigQuery(String message) {
-        try {
-            String credentialsPath = System.getenv("GOOGLE_APPLICATION_CREDENTIALS");
-            if (credentialsPath == null || credentialsPath.isEmpty()) {
-                throw new RuntimeException("GOOGLE_APPLICATION_CREDENTIALS not set");
-            }
-
-            // Directly try to open the file stream (avoid isFile() check)
-            try (FileInputStream serviceAccountStream = new FileInputStream(credentialsPath)) {
-                ServiceAccountCredentials credentials = ServiceAccountCredentials.fromStream(serviceAccountStream);
-
-                BigQuery bigquery = BigQueryOptions.newBuilder()
-                        .setCredentials(credentials)
-                        .build()
-                        .getService();
-
-                TableId tableId = TableId.of("kafka_pipeline", "messages");
-
-                Map<String, Object> rowContent = new HashMap<>();
-                rowContent.put("id", UUID.randomUUID().toString());
-                rowContent.put("message", message);
-                rowContent.put("timestamp", System.currentTimeMillis() / 1000.0);
-
-                InsertAllRequest request = InsertAllRequest.newBuilder(tableId)
-                        .addRow(rowContent)
-                        .build();
-
-                InsertAllResponse response = bigquery.insertAll(request);
-
-                if (response.hasErrors()) {
-                    System.out.println("Insert failed: " + response.getInsertErrors());
-                } else {
-                    System.out.println("Data inserted successfully: " + message);
-                }
-            }
-
-        } catch (Exception e) {
-            System.out.println("Exception while inserting into BigQuery: " + e.getMessage());
-            e.printStackTrace();
-        }
+    } catch (Exception e) {
+        System.out.println("Exception while inserting into BigQuery: " + e.getMessage());
+        e.printStackTrace();
     }
 }
