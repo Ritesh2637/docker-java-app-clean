@@ -1,18 +1,32 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: java-hello-deployment
+  name: docker-java-app
+  labels:
+    app: docker-java-app
 spec:
-  replicas: 6
+  replicas: 2
   selector:
     matchLabels:
-      app: java-hello
+      app: docker-java-app
   template:
     metadata:
       labels:
-        app: java-hello
+        app: docker-java-app
     spec:
       containers:
-        - name: java-hello-container
-          image: riteshmishra2637/docker-java-app:app
-          imagePullPolicy: IfNotPresent
+      - name: docker-java-app
+        image: ritesh/docker-java-app:latest   # Jenkins pipeline push karega
+        ports:
+        - containerPort: 8080
+        env:
+        - name: GOOGLE_APPLICATION_CREDENTIALS
+          value: /app/gcp-key.json
+        volumeMounts:
+        - name: gcp-key-volume
+          mountPath: /app/gcp-key.json
+          subPath: gcp-key.json
+      volumes:
+      - name: gcp-key-volume
+        secret:
+          secretName: gcp-key   # Kubernetes secret me tumhara GCP JSON hoga
