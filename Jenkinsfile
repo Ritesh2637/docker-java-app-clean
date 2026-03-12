@@ -13,7 +13,7 @@ pipeline {
         }
         stage('Docker Build') {
             steps {
-                sh 'docker build -t docker-java-app:app .'
+                sh 'docker build --no-cache -t docker-java-app:app .'
             }
         }
         stage('Docker Run') {
