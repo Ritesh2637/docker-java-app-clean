@@ -50,8 +50,15 @@ public class SimpleConsumer {
             System.out.println("GOOGLE_APPLICATION_CREDENTIALS=" + credentialsPath);
 
             File credFile = new File(credentialsPath);
+
+            // Fallback: if not found, try workspace copy
             if (!credFile.exists() || !credFile.isFile()) {
-                throw new RuntimeException("Credential file not found: " + credentialsPath);
+                System.out.println("Credential file not found at env path, trying ./gcp-key.json");
+                credFile = new File("./gcp-key.json");
+            }
+
+            if (!credFile.exists() || !credFile.isFile()) {
+                throw new RuntimeException("Credential file not found at: " + credFile.getAbsolutePath());
             }
 
             // Load credentials
