@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
       - name: docker-java-app
-        image: riteshmishra2637/docker-java-app:latest   # Jenkins pipeline push karega
+        image: riteshmishra26/docker-java-app:app   # Jenkins pipeline push karega
         ports:
         - containerPort: 8080
         env:
