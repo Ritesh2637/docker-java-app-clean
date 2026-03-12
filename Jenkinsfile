@@ -31,7 +31,7 @@ pipeline {
         }
     }
 }
-        stage('Docker Debug') {
+      stage('Docker Debug') {
     steps {
         withCredentials([file(credentialsId: 'gcp-key', variable: 'GCP_KEY')]) {
             sh '''
