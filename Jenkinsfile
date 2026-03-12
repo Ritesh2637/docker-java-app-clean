@@ -22,16 +22,16 @@ pipeline {
             sh '''
                 echo "Secret file path on host: $GCP_KEY"
                 ls -l $GCP_KEY
-               docker run --rm \
-             -e GOOGLE_APPLICATION_CREDENTIALS=/credentials/service-account.json \
-             -v $GCP_KEY:/credentials/service-account.json:ro \
-              docker-java-app:app \
-              java -jar app.jar
+                docker run --rm \
+               -e GOOGLE_APPLICATION_CREDENTIALS=/credentials/service-account.json \
+               -v $GCP_KEY:/credentials/service-account.json:ro \
+               docker-java-app:app \
+               java -jar app.jar
             '''
         }
     }
 }
-     stage('Docker Debug') {
+    stage('Docker Debug') {
     steps {
         withCredentials([file(credentialsId: 'gcp-key', variable: 'GCP_KEY')]) {
             sh '''
