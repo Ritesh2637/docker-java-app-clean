@@ -23,11 +23,11 @@ pipeline {
                 echo "Secret file path on host: $GCP_KEY"
                 ls -l $GCP_KEY
                 docker run --rm \
-               -e GOOGLE_APPLICATION_CREDENTIALS=/key.json \
-               -v $GCP_KEY:/key.json:ro \
-               docker-java-app:app \
-               java -jar app.jar
-               '''
+                -e GOOGLE_APPLICATION_CREDENTIALS=/key.json \
+                -v $GCP_KEY:/key.json:ro \
+                docker-java-app:app \
+                java -jar app.jar
+            '''
         }
     }
 }
