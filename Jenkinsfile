@@ -31,14 +31,14 @@ pipeline {
         }
     }
 }
-      stage('Docker Debug') {
+     stage('Docker Debug') {
     steps {
         withCredentials([file(credentialsId: 'gcp-key', variable: 'GCP_KEY')]) {
             sh '''
                 docker run --rm \
-                -v $GCP_KEY:/tmp/key.json:ro \
+                -v $GCP_KEY:/credentials/key.json:ro \
                 docker-java-app:app \
-                ls -l /tmp
+                ls -l /credentials
             '''
         }
     }
