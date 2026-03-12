@@ -19,14 +19,14 @@ pipeline {
         stage('Docker Run') {
             steps {
                 withCredentials([file(credentialsId: 'gcp-key', variable: 'GCP_KEY')]) {
-                    bat '''
+                    bat """
                         echo Secret file path on host: %GCP_KEY%
                         dir %GCP_KEY%
                         docker run --rm ^
                           -e GOOGLE_APPLICATION_CREDENTIALS=/app/key.json ^
                           -v "%GCP_KEY%:/app/key.json:ro" ^
                           docker-java-app:app
-                    '''
+                    """
                 }
             }
         }
